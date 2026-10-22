@@ -1220,7 +1220,7 @@ class Content(Visual):
         """
         content = self.rstrip().truncate(width, ellipsis=ellipsis)
         left = (width - content.cell_length) // 2
-        right = width - left
+        right = width - left - content.cell_length
         content = content.pad(left, right)
         return content
 

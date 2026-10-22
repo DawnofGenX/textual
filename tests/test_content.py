@@ -587,3 +587,39 @@ def test_blank_method(
     assert blank.plain == text
     assert blank.spans == spans
     assert blank.cell_length == cell_length
+
+
+@pytest.mark.parametrize(
+    "text,width,expected_plain",
+    [
+        ("ab", 10, "    ab    "),
+        ("hello", 11, "   hello   "),
+        ("hello", 5, "hello"),
+        ("hello", 3, "hel"),
+        ("ab", 0, ""),
+        ("abc", 10, "   abc    "),
+    ],
+)
+def test_center(text: str, width: int, expected_plain: str) -> None:
+    """Regression test for https://github.com/Textualize/textual/issues/6734."""
+    content = Content(text).center(width)
+    assert content.cell_length == width
+    assert content.plain == expected_plain
+
+
+def test_center_preserves_style_and_double_width_cells() -> None:
+    """Center should respect double width cells and keep spans aligned."""
+    cjk_content = Content("你好").center(10)
+    assert cjk_content.cell_length == 10
+
+    styled_content = Content.from_markup("[red]ab[/red]").center(10)
+    assert styled_content.cell_length == 10
+    assert styled_content.plain == "    ab    "
+    assert styled_content.spans == [Span(4, 6, "red")]
+
+
+def test_right_aligns_to_width() -> None:
+    """Right justification should pad by the deficit only (not double it)."""
+    content = Content("ab").right(10)
+    assert content.cell_length == 10
+    assert content.plain == "        ab"
